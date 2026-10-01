@@ -26,7 +26,7 @@ export function GameSummaryModal({
   onClose,
   data,
   opponentName,
-  teamName = "OJ",
+  teamName = "Us",
   field,
   allPlayers,
 }: GameSummaryModalProps) {

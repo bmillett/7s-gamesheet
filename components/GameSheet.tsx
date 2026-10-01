@@ -2506,6 +2506,7 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
           onClose={() => setShowSummaryModal(false)}
           data={displayData}
           opponentName={opponentName}
+          teamName={teamName}
           field={fieldName}
           allPlayers={teamPlayers}
         />
