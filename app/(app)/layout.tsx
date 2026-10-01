@@ -20,7 +20,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <header className="border-b border-border bg-card sticky top-0 z-40 print:hidden">
         <div className="max-w-5xl mx-auto px-4 py-2 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <span className="font-extrabold text-base text-foreground tracking-tight">4s Gamesheet</span>
+            <span className="font-extrabold text-base text-foreground tracking-tight">7s Gamesheet</span>
             {team && (
               <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
                 {team.name}
