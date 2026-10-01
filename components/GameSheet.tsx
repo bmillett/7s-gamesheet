@@ -52,9 +52,9 @@ import type {
 
 const TOTAL_SLOTS = 24
 const DEFAULT_DIVIDERS = [8, 16] // Default to 3 lines (8 / 8 / 8)
-const MIN_POINTS = 30
-const DEFAULT_POINTS = 40
-const MAX_POINTS = 60
+const MIN_POINTS = 29
+const DEFAULT_POINTS = 30
+const MAX_POINTS = 40
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -187,7 +187,7 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
   const [fieldName, setFieldName] = useState(activeSheet?.field ?? "")
   const [sheetTitle, setSheetTitle] = useState(activeSheet?.sheet_data?.customTitle ?? "")
   const [activePoints, setActivePoints] = useState(
-    () => Math.max(activeSheet?.sheet_data?.points?.length ?? 0, DEFAULT_POINTS)
+    () => activeSheet?.sheet_data?.totalPoints ?? Math.max(activeSheet?.sheet_data?.points?.length ?? 0, DEFAULT_POINTS)
   )
 
   const [isPending, startTransition] = useTransition()
@@ -231,7 +231,10 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
     if (!sheet) return
     setSelectedSheetId(id)
     setData(sheet.sheet_data)
-    setActivePoints(Math.max(sheet.sheet_data?.points?.length ?? 0, DEFAULT_POINTS))
+    setActivePoints(
+      sheet.sheet_data?.totalPoints ??
+      Math.max(sheet.sheet_data?.points?.length ?? 0, DEFAULT_POINTS)
+    )
     setOpponentName(sheet.opponent_name ?? "")
     setTournamentName(sheet.tournament_name ?? "")
     setFieldName(sheet.field ?? "")
@@ -1220,7 +1223,11 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
                   max={MAX_POINTS}
                   value={activePoints}
                   disabled={isReadOnly}
-                  onChange={(e) => setActivePoints(Number(e.target.value))}
+                  onChange={(e) => {
+                    const n = Number(e.target.value)
+                    setActivePoints(n)
+                    saveData({ ...data, totalPoints: n })
+                  }}
                   className="w-20 accent-primary disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>

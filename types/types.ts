@@ -76,6 +76,7 @@ export interface GameSheetData {
   startingPossession?: "offense" | "defense"
   clientUpdatedAt?: number
   version?: number
+  totalPoints?: number
 }
 
 export interface GameSheetRow {
