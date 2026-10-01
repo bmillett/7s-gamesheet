@@ -1607,6 +1607,34 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
                 {isStatsPanelOpen && (
                   <div className="px-4 pb-4 pt-1 space-y-4 border-t border-violet-500/30">
 
+                    {/* ── Score buttons (duplicated from game mode header) ── */}
+                    <div className="flex items-center gap-2 pt-1">
+                      <button
+                        type="button"
+                        disabled={isReadOnly}
+                        onClick={() => !isReadOnly && toggleScorer(selectedLivePoint, "us")}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                          currentLivePointObj.scorer === "us"
+                            ? "bg-amber-600 text-white ring-2 ring-amber-400"
+                            : "bg-amber-500/20 text-amber-800 dark:text-amber-300 hover:bg-amber-500/30 border border-amber-500/40"
+                        }`}
+                      >
+                        +1 {teamName} (Pt {selectedLivePoint + 1})
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isReadOnly}
+                        onClick={() => !isReadOnly && toggleScorer(selectedLivePoint, "them")}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                          currentLivePointObj.scorer === "them"
+                            ? "bg-rose-600 text-white ring-2 ring-rose-400"
+                            : "bg-rose-500/20 text-rose-800 dark:text-rose-300 hover:bg-rose-500/30 border border-rose-500/40"
+                        }`}
+                      >
+                        +1 Opponent
+                      </button>
+                    </div>
+
                     {/* ── Goal / Assist Card — only when we scored ── */}
                     {currentLivePointObj.scorer === "us" && (
                       <div className="rounded-lg border border-amber-400/60 bg-amber-500/10 p-3 space-y-3">
