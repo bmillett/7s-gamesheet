@@ -1385,13 +1385,13 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
                           Point {selectedLivePoint + 1} Lineup:
                         </span>
                         <span className={`px-2 py-0.5 rounded-full font-bold text-xs ${
-                          currentLivePointObj.playerIds.length === 4
+                          currentLivePointObj.playerIds.length === 7
                             ? "bg-emerald-600 text-white"
-                            : currentLivePointObj.playerIds.length > 4
+                            : currentLivePointObj.playerIds.length > 7
                             ? "bg-rose-600 text-white"
                             : "bg-amber-500/20 text-amber-800 dark:text-amber-300"
                         }`}>
-                          {currentLivePointObj.playerIds.length} / 4 on field
+                          {currentLivePointObj.playerIds.length} / 7 on field
                         </span>
                         {currentLivePointObj.playerIds.length > 0 && (
                           <button
