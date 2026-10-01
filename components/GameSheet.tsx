@@ -1608,7 +1608,7 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
                   <div className="px-4 pb-4 pt-1 space-y-4 border-t border-violet-500/30">
 
                     {/* ── Score buttons (duplicated from game mode header) ── */}
-                    <div className="flex items-center gap-2 pt-1">
+                    <div className="flex items-center gap-2 pt-1 justify-end">
                       <button
                         type="button"
                         disabled={isReadOnly}
