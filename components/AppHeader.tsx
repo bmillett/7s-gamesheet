@@ -22,7 +22,8 @@ export function AppHeader({ teamName, currentTeamId, allTeams }: AppHeaderProps)
   function handleTeamChange(teamId: string) {
     startTransition(async () => {
       await setActiveTeamAction(teamId)
-      // push to the current page to force a full remount with new team data
+      // refresh() busts the server cache, push() remounts client components
+      router.refresh()
       router.push(pathname)
     })
   }
