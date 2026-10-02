@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { useTransition } from "react"
 import { setActiveTeamAction } from "@/lib/data/actions"
 import { LogoutButton } from "@/components/LogoutButton"
@@ -16,12 +16,14 @@ interface AppHeaderProps {
 
 export function AppHeader({ teamName, currentTeamId, allTeams }: AppHeaderProps) {
   const router = useRouter()
+  const pathname = usePathname()
   const [isPending, startTransition] = useTransition()
 
   function handleTeamChange(teamId: string) {
     startTransition(async () => {
       await setActiveTeamAction(teamId)
-      router.refresh()
+      // push to the current page to force a full remount with new team data
+      router.push(pathname)
     })
   }
 
