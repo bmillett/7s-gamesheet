@@ -46,6 +46,13 @@ export interface GameSheetPlayer {
   slotOrder: number   // position within the grid (0-based, 0-11)
 }
 
+/** A named lineup preset (e.g. "Power O", "Power D") */
+export interface LinePreset {
+  id: string          // short random key, generated client-side
+  name: string        // e.g. "Power O", "Power D"
+  playerIds: string[] // ordered list of player IDs (typically 7)
+}
+
 /** One point column in the sheet */
 export interface GameSheetPoint {
   pointNumber: number     // 1-indexed
@@ -74,6 +81,8 @@ export interface GameSheetData {
   customTitle?: string
   injuredPlayerIds?: string[]
   startingPossession?: "offense" | "defense"
+  startingEnd?: "left" | "right"
+  linePresets?: LinePreset[]
   clientUpdatedAt?: number
   version?: number
   totalPoints?: number

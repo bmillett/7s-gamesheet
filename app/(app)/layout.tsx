@@ -47,6 +47,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               🧢 Coaches
             </Link>
             <Link
+              href="/stats"
+              className="px-3 py-2.5 min-h-[44px] flex items-center rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+            >
+              📈 Stats
+            </Link>
+            <Link
               href="/help"
               className="px-3 py-2.5 min-h-[44px] flex items-center rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
             >
