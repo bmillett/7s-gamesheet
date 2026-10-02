@@ -1363,9 +1363,9 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
                   title="Click to set which end the team started at (cycles: Left → Right → unset)"
                 >
                   {displayData.startingEnd === "left" ? (
-                    <><span className="text-base leading-none">←</span><span>Starting</span></>
+                    <><span className="text-base leading-none">←</span><span>Started</span></>
                   ) : displayData.startingEnd === "right" ? (
-                    <><span>Starting</span><span className="text-base leading-none">→</span></>
+                    <><span>Started</span><span className="text-base leading-none">→</span></>
                   ) : (
                     <><span className="text-base leading-none">↔</span><span>End</span></>
                   )}
