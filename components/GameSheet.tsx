@@ -36,6 +36,8 @@ import {
 import { syncEngine } from "@/lib/offline/sync-engine"
 import { saveCachedRoster, getLocalSheet, saveLocalSheet } from "@/lib/offline/db"
 import { triggerHaptic } from "@/lib/utils/haptics"
+import { getExpectedRatio, countGenders, getRatioStatus, isFmpAsMmp } from "@/lib/utils/gender-ratio"
+import type { StartingRatio } from "@/lib/utils/gender-ratio"
 import { SyncStatusBadge } from "@/components/SyncStatusBadge"
 import { GameSummaryModal } from "@/components/GameSummaryModal"
 import type {
@@ -206,6 +208,7 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
   const [showRosterBench, setShowRosterBench] = useState(true)
   const [showDividerControls, setShowDividerControls] = useState(false)
   const [showPresetManager, setShowPresetManager] = useState(false)
+  const [pendingFmpAsMmp, setPendingFmpAsMmp] = useState<{ playerId: string; pointIndex: number } | null>(null)
   const [newPresetName, setNewPresetName] = useState("")
   const [renamingPresetId, setRenamingPresetId] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState("")
@@ -610,15 +613,46 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
     // If player is marked injured/out, ignore click
     if (data.injuredPlayerIds?.includes(playerId)) return
 
-    triggerHaptic("light")
     const pts = [...displayData.points]
     const point = { ...pts[pointIndex] }
     const has = point.playerIds.includes(playerId)
+
+    // When adding (not removing) and gender ratio is enabled, check FMP-as-MMP
+    if (!has && data.genderRatioEnabled && data.startingRatio) {
+      if (isFmpAsMmp(playerId, point.playerIds, pointIndex, data.startingRatio as StartingRatio, teamPlayers)) {
+        setPendingFmpAsMmp({ playerId, pointIndex })
+        return
+      }
+    }
+
+    triggerHaptic("light")
     point.playerIds = has
       ? point.playerIds.filter((id) => id !== playerId)
       : [...point.playerIds, playerId]
     pts[pointIndex] = point
     saveData({ ...displayData, points: pts })
+  }
+
+  function confirmFmpAsMmp() {
+    if (!pendingFmpAsMmp) return
+    triggerHaptic("warning")
+    const { playerId, pointIndex } = pendingFmpAsMmp
+    const pts = [...displayData.points]
+    const point = { ...pts[pointIndex] }
+    point.playerIds = [...point.playerIds, playerId]
+    pts[pointIndex] = point
+    saveData({ ...displayData, points: pts })
+    setPendingFmpAsMmp(null)
+  }
+
+  function toggleGenderRatio() {
+    triggerHaptic("medium")
+    saveData({ ...displayData, genderRatioEnabled: !displayData.genderRatioEnabled })
+  }
+
+  function setStartingRatio(ratio: StartingRatio) {
+    triggerHaptic("light")
+    saveData({ ...displayData, startingRatio: ratio })
   }
 
   function toggleCleanHold(pointIndex: number) {
@@ -1334,6 +1368,47 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
                     ? "→ Started Right"
                     : "↔ Starting End"}
                 </button>
+                <button
+                  type="button"
+                  disabled={isReadOnly}
+                  onClick={toggleGenderRatio}
+                  className={`px-2.5 py-1 rounded text-xs font-bold transition-all disabled:opacity-50 ${
+                    displayData.genderRatioEnabled
+                      ? "bg-pink-600 text-white shadow-sm"
+                      : "bg-muted text-muted-foreground border border-border"
+                  }`}
+                  title="Toggle gender ratio enforcement (FMP/MMP alternating)"
+                >
+                  ⚥ Ratio {displayData.genderRatioEnabled ? "On" : "Off"}
+                </button>
+                {displayData.genderRatioEnabled && (
+                  <>
+                    <button
+                      type="button"
+                      disabled={isReadOnly}
+                      onClick={() => setStartingRatio("4fmp-3mmp")}
+                      className={`px-2.5 py-1 rounded text-xs font-bold transition-all disabled:opacity-50 ${
+                        (displayData.startingRatio ?? "4fmp-3mmp") === "4fmp-3mmp"
+                          ? "bg-pink-500 text-white shadow-sm ring-2 ring-pink-300"
+                          : "bg-muted text-muted-foreground border border-border hover:bg-accent"
+                      }`}
+                    >
+                      Start 4F/3M
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isReadOnly}
+                      onClick={() => setStartingRatio("3fmp-4mmp")}
+                      className={`px-2.5 py-1 rounded text-xs font-bold transition-all disabled:opacity-50 ${
+                        displayData.startingRatio === "3fmp-4mmp"
+                          ? "bg-blue-500 text-white shadow-sm ring-2 ring-blue-300"
+                          : "bg-muted text-muted-foreground border border-border hover:bg-accent"
+                      }`}
+                    >
+                      Start 3F/4M
+                    </button>
+                  </>
+                )}
               </div>
             </div>
 
@@ -1434,6 +1509,18 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
                         }`}>
                           {currentLivePointObj.playerIds.length} / 7 on field
                         </span>
+                        {displayData.genderRatioEnabled && displayData.startingRatio && (() => {
+                          const status = getRatioStatus(selectedLivePoint, displayData.startingRatio as StartingRatio, currentLivePointObj.playerIds, teamPlayers)
+                          const expected = getExpectedRatio(selectedLivePoint, displayData.startingRatio as StartingRatio)
+                          const { fmp, mmp } = countGenders(currentLivePointObj.playerIds, teamPlayers)
+                          return (
+                            <span className={`px-2 py-0.5 rounded-full font-bold text-xs ${
+                              status === "ok" ? "bg-pink-600 text-white" : status === "wrong" ? "bg-orange-500 text-white" : "bg-muted text-muted-foreground"
+                            }`} title={`Expected: ${expected.fmp}F / ${expected.mmp}M`}>
+                              {status === "incomplete" ? `${expected.fmp}F/${expected.mmp}M` : `${fmp}F ${mmp}M${status === "ok" ? " ✓" : " ⚠"}`}
+                            </span>
+                          )
+                        })()}
                         {currentLivePointObj.playerIds.length > 0 && (
                           <button
                             type="button"
@@ -1488,6 +1575,38 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
                         </label>
                       </div>
                     </div>
+
+                    {/* ── FMP-as-MMP Confirmation ── */}
+                    {pendingFmpAsMmp && pendingFmpAsMmp.pointIndex === selectedLivePoint && (() => {
+                      const player = teamPlayers.find(p => p.id === pendingFmpAsMmp.playerId)
+                      const expected = displayData.startingRatio ? getExpectedRatio(selectedLivePoint, displayData.startingRatio as StartingRatio) : null
+                      return (
+                        <div className="rounded-lg border-2 border-orange-400 bg-orange-50 dark:bg-orange-950/20 p-3 space-y-2">
+                          <div className="text-xs font-bold text-orange-700 dark:text-orange-300">
+                            ⚠️ FMP playing as MMP-matching
+                          </div>
+                          <div className="text-xs text-foreground">
+                            <span className="font-semibold">{player?.display_name ?? "This player"}</span> is FMP but this point calls for {expected ? `${expected.fmp}F/${expected.mmp}M` : "more MMP"}. The FMP quota is already full.
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={confirmFmpAsMmp}
+                              className="px-3 py-1.5 rounded-md text-xs font-bold bg-orange-600 text-white hover:bg-orange-700 transition-colors"
+                            >
+                              Confirm — Add as MMP-matching
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setPendingFmpAsMmp(null)}
+                              className="px-3 py-1.5 rounded-md text-xs font-bold border border-border text-muted-foreground hover:bg-accent transition-colors"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      )
+                    })()}
 
                     {/* ── Preset Quick-Select ── */}
                     {(data.linePresets ?? []).length > 0 && (

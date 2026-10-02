@@ -82,6 +82,8 @@ export interface GameSheetData {
   injuredPlayerIds?: string[]
   startingPossession?: "offense" | "defense"
   startingEnd?: "left" | "right"
+  genderRatioEnabled?: boolean
+  startingRatio?: "4fmp-3mmp" | "3fmp-4mmp"
   linePresets?: LinePreset[]
   clientUpdatedAt?: number
   version?: number
