@@ -21,6 +21,8 @@ export function TeamSettings({ teamId, teamName, playersPerSide }: TeamSettingsP
   const [namePending, startNameTransition] = useTransition()
   const [formatPending, startFormatTransition] = useTransition()
 
+  const savedFormat: 4 | 7 = playersPerSide === 4 ? 4 : 7
+
   function handleNameSave(e: React.FormEvent) {
     e.preventDefault()
     if (!name.trim()) return
@@ -34,21 +36,20 @@ export function TeamSettings({ teamId, teamName, playersPerSide }: TeamSettingsP
     })
   }
 
-  function handleFormatChange(newFormat: 4 | 7) {
-    if (newFormat === format) return
-    setFormat(newFormat)
+  function handleFormatSave(e: React.FormEvent) {
+    e.preventDefault()
     setFormatError(null)
     setFormatSaved(false)
     startFormatTransition(async () => {
-      const res = await updateTeamFormatAction(teamId, newFormat)
-      if ("error" in res) { setFormatError(res.error); setFormat(format); return }
+      const res = await updateTeamFormatAction(teamId, format)
+      if ("error" in res) { setFormatError(res.error); setFormat(savedFormat); return }
       setFormatSaved(true)
       router.refresh()
     })
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+    <div className="max-w-sm rounded-xl border border-border bg-card p-5 space-y-4">
       <h2 className="text-sm font-bold text-foreground">Team Settings</h2>
 
       {/* Team name */}
@@ -75,7 +76,7 @@ export function TeamSettings({ teamId, teamName, playersPerSide }: TeamSettingsP
       </form>
 
       {/* Format */}
-      <div className="space-y-1.5">
+      <form onSubmit={handleFormatSave} className="space-y-1.5">
         <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Format</label>
         <div className="flex gap-2">
           {([7, 4] as const).map((f) => (
@@ -83,7 +84,7 @@ export function TeamSettings({ teamId, teamName, playersPerSide }: TeamSettingsP
               key={f}
               type="button"
               disabled={formatPending}
-              onClick={() => handleFormatChange(f)}
+              onClick={() => { setFormat(f); setFormatSaved(false) }}
               className={`flex-1 rounded-lg border px-3 py-2 text-sm font-bold transition-colors disabled:opacity-50 ${
                 format === f
                   ? "bg-primary text-primary-foreground border-primary"
@@ -93,13 +94,20 @@ export function TeamSettings({ teamId, teamName, playersPerSide }: TeamSettingsP
               {f}v{f}
             </button>
           ))}
+          <button
+            type="submit"
+            disabled={formatPending || format === savedFormat}
+            className="px-3 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 disabled:opacity-50 transition-opacity"
+          >
+            {formatPending ? "Saving…" : "Save"}
+          </button>
         </div>
         <p className="text-xs text-muted-foreground">
           Changes the sheet grid size and gender ratio rules. Existing game sheets are not affected.
         </p>
         {formatError && <p className="text-xs text-destructive">{formatError}</p>}
         {formatSaved && <p className="text-xs text-emerald-600 dark:text-emerald-400">Format updated.</p>}
-      </div>
+      </form>
     </div>
   )
 }
