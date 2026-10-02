@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 import { getCurrentUser, getTeamForUser, getActiveTeamId } from "@/lib/data/auth"
 import { getRosterPlayers } from "@/lib/data/queries"
 import { RosterEditor } from "@/components/RosterEditor"
+import { RosterSizeEditor } from "@/components/RosterSizeEditor"
 
 export default async function RosterPage() {
   const user = await getCurrentUser()
@@ -19,8 +20,9 @@ export default async function RosterPage() {
       <div className="border-b border-border pb-3">
         <h1 className="text-lg font-bold text-foreground">Roster — {team.name}</h1>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Manage your {team.roster_size}-player roster. Active players appear in the gamesheet bench.
+          Active players appear in the gamesheet bench.
         </p>
+        <RosterSizeEditor teamId={team.id} rosterSize={team.roster_size} />
       </div>
       <RosterEditor teamId={team.id} initialPlayers={players} />
     </div>

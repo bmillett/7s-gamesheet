@@ -186,6 +186,21 @@ export async function createTeamAction(userId: string, teamName: string, players
   }
 }
 
+export async function updateTeamRosterSizeAction(teamId: string, rosterSize: number) {
+  try {
+    const { supabase } = await assertAuth()
+    const { error } = await supabase
+      .from("teams")
+      .update({ roster_size: rosterSize })
+      .eq("id", teamId)
+    if (error) return { error: error.message }
+    revalidatePath("/roster")
+    return { success: true }
+  } catch (e: any) {
+    return { error: e.message }
+  }
+}
+
 export async function updateTeamNameAction(teamId: string, name: string) {
   try {
     const { supabase } = await assertAuth()
