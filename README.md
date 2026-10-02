@@ -1,6 +1,6 @@
 # Gamesheet
 
-A progressive web app (PWA) for tracking live game scores, lineups, and player stats for mixed ultimate frisbee. Supports both **4v4** and **7v7** formats from a single codebase — the app adapts automatically based on the team's format.
+A progressive web app (PWA) for tracking live game scores, lineups, and player stats for ultimate frisbee. Supports both **4v4** and **7v7** formats from a single codebase — the app adapts automatically based on the team's format.
 
 Built with [Next.js](https://nextjs.org), [Supabase](https://supabase.com), and [Tailwind CSS](https://tailwindcss.com). Deployed on [Vercel](https://vercel.com).
 

@@ -3,7 +3,7 @@ import "./globals.css"
 
 export const metadata: Metadata = {
   title: "Gamesheet",
-  description: "Live game sheet for mixed ultimate frisbee",
+  description: "Live game sheet for ultimate frisbee",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

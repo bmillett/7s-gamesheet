@@ -1,7 +1,7 @@
 {
   "name": "Gamesheet",
   "short_name": "Gamesheet",
-  "description": "Live game sheet for mixed ultimate frisbee",
+  "description": "Live game sheet for ultimate frisbee",
   "start_url": "/sheet",
   "display": "standalone",
   "background_color": "#0a0a0a",
