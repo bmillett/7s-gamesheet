@@ -32,8 +32,8 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center space-y-1">
-          <h1 className="text-2xl font-extrabold text-foreground tracking-tight">7s Gamesheet</h1>
-          <p className="text-sm text-muted-foreground">7v7 Mixed Ultimate</p>
+          <h1 className="text-2xl font-extrabold text-foreground tracking-tight">Gamesheet</h1>
+          <p className="text-sm text-muted-foreground">Mixed Ultimate Frisbee</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4 bg-card border border-border rounded-2xl p-6 shadow-sm">
