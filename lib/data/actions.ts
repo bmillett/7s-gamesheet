@@ -201,6 +201,22 @@ export async function updateTeamNameAction(teamId: string, name: string) {
   }
 }
 
+export async function updateTeamFormatAction(teamId: string, playersPerSide: 4 | 7) {
+  try {
+    const { supabase } = await assertAuth()
+    const rosterSize = playersPerSide === 4 ? 12 : 24
+    const { error } = await supabase
+      .from("teams")
+      .update({ players_per_side: playersPerSide, roster_size: rosterSize })
+      .eq("id", teamId)
+    if (error) return { error: error.message }
+    revalidatePath("/", "layout")
+    return { success: true }
+  } catch (e: any) {
+    return { error: e.message }
+  }
+}
+
 export async function addCoachAction(teamId: string, email: string, password?: string) {
   try {
     const { userId } = await assertAuth()
