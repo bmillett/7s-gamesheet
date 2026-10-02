@@ -1382,32 +1382,21 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
                   ⚥ Ratio {displayData.genderRatioEnabled ? "On" : "Off"}
                 </button>
                 {displayData.genderRatioEnabled && (
-                  <>
-                    <button
-                      type="button"
-                      disabled={isReadOnly}
-                      onClick={() => setStartingRatio("4fmp-3mmp")}
-                      className={`px-2.5 py-1 rounded text-xs font-bold transition-all disabled:opacity-50 ${
-                        (displayData.startingRatio ?? "4fmp-3mmp") === "4fmp-3mmp"
-                          ? "bg-pink-500 text-white shadow-sm ring-2 ring-pink-300"
-                          : "bg-muted text-muted-foreground border border-border hover:bg-accent"
-                      }`}
-                    >
-                      Start 4F/3M
-                    </button>
-                    <button
-                      type="button"
-                      disabled={isReadOnly}
-                      onClick={() => setStartingRatio("3fmp-4mmp")}
-                      className={`px-2.5 py-1 rounded text-xs font-bold transition-all disabled:opacity-50 ${
-                        displayData.startingRatio === "3fmp-4mmp"
-                          ? "bg-blue-500 text-white shadow-sm ring-2 ring-blue-300"
-                          : "bg-muted text-muted-foreground border border-border hover:bg-accent"
-                      }`}
-                    >
-                      Start 3F/4M
-                    </button>
-                  </>
+                  <button
+                    type="button"
+                    disabled={isReadOnly}
+                    onClick={() => setStartingRatio(
+                      (displayData.startingRatio ?? "4fmp-3mmp") === "4fmp-3mmp" ? "3fmp-4mmp" : "4fmp-3mmp"
+                    )}
+                    className={`px-2.5 py-1 rounded text-xs font-bold transition-all disabled:opacity-50 ${
+                      (displayData.startingRatio ?? "4fmp-3mmp") === "4fmp-3mmp"
+                        ? "bg-pink-500 text-white shadow-sm"
+                        : "bg-blue-500 text-white shadow-sm"
+                    }`}
+                    title="Click to toggle starting gender ratio"
+                  >
+                    {(displayData.startingRatio ?? "4fmp-3mmp") === "4fmp-3mmp" ? "Start 4F/3M" : "Start 3F/4M"}
+                  </button>
                 )}
               </div>
             </div>
