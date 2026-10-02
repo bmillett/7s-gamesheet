@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 import { getCurrentUser, getTeamForUser, getTeamsForUser, getActiveTeamId } from "@/lib/data/auth"
 import { AppHeader } from "@/components/AppHeader"
 import { CreateTeamForm } from "@/components/CreateTeamForm"
+import { TeamBoundary } from "@/components/TeamBoundary"
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser()
@@ -22,13 +23,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         teamName={team?.name ?? ""}
       />
 
-      {/* Main */}
+      {/* Main — key forces full remount when active team changes */}
       <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-4">
-        {!team ? (
-          <CreateTeamForm userId={user.id} />
-        ) : (
-          children
-        )}
+        <TeamBoundary key={team?.id ?? "no-team"}>
+          {!team ? (
+            <CreateTeamForm userId={user.id} />
+          ) : (
+            children
+          )}
+        </TeamBoundary>
       </main>
     </div>
   )
