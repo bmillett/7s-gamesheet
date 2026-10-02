@@ -1353,7 +1353,7 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
                   type="button"
                   disabled={isReadOnly}
                   onClick={toggleStartingEnd}
-                  className={`px-2.5 py-1 rounded text-xs font-bold transition-all disabled:opacity-50 ${
+                  className={`px-2.5 py-1 rounded text-xs font-bold transition-all disabled:opacity-50 flex items-center gap-1.5 ${
                     displayData.startingEnd === "left"
                       ? "bg-violet-600 text-white shadow-sm"
                       : displayData.startingEnd === "right"
@@ -1362,11 +1362,13 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
                   }`}
                   title="Click to set which end the team started at (cycles: Left → Right → unset)"
                 >
-                  {displayData.startingEnd === "left"
-                    ? "← Started Left"
-                    : displayData.startingEnd === "right"
-                    ? "→ Started Right"
-                    : "↔ Starting End"}
+                  {displayData.startingEnd === "left" ? (
+                    <><span className="text-base leading-none">←</span><span>Starting</span></>
+                  ) : displayData.startingEnd === "right" ? (
+                    <><span>Starting</span><span className="text-base leading-none">→</span></>
+                  ) : (
+                    <><span className="text-base leading-none">↔</span><span>End</span></>
+                  )}
                 </button>
                 <button
                   type="button"
