@@ -4,7 +4,7 @@ A progressive web app (PWA) for tracking live game scores, lineups, and player s
 
 Built with [Next.js](https://nextjs.org), [Supabase](https://supabase.com), and [Tailwind CSS](https://tailwindcss.com). Deployed on [Vercel](https://vercel.com).
 
-**Live app:** https://gamesheet.vercel.app
+**Live app:** https://ulti-gamesheet-ignite-ultimate.vercel.app
 
 ---
 
