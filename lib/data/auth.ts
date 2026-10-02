@@ -14,7 +14,16 @@ export async function getTeamsForUser(): Promise<Team[]> {
     .order("created_at", { ascending: true })
 
   if (!data) return []
-  return data.map((row) => row.teams as unknown as Team).filter(Boolean)
+  const teams = data.map((row) => row.teams as unknown as Team).filter(Boolean)
+
+  // Optional: restrict to a specific format when NEXT_PUBLIC_FORMAT is set (e.g. "4" or "7")
+  const formatFilter = process.env.NEXT_PUBLIC_FORMAT
+  if (formatFilter) {
+    const pps = parseInt(formatFilter, 10)
+    return teams.filter((t) => t.players_per_side === pps)
+  }
+
+  return teams
 }
 
 export async function getTeamForUser(preferredTeamId?: string | null): Promise<Team | null> {

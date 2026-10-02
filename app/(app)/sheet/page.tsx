@@ -24,6 +24,7 @@ export default async function SheetPage() {
     <GameSheet
       teamId={team.id}
       teamName={team.name}
+      playersPerSide={team.players_per_side}
       teamPlayers={activePlayers}
       initialSheets={sheets}
     />

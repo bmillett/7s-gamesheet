@@ -38,6 +38,7 @@ import { saveCachedRoster, getLocalSheet, saveLocalSheet } from "@/lib/offline/d
 import { triggerHaptic } from "@/lib/utils/haptics"
 import { getExpectedRatio, countGenders, getRatioStatus, isFmpAsMmp } from "@/lib/utils/gender-ratio"
 import type { StartingRatio } from "@/lib/utils/gender-ratio"
+import { getTeamConfig } from "@/lib/utils/team-config"
 import { SyncStatusBadge } from "@/components/SyncStatusBadge"
 import { GameSummaryModal } from "@/components/GameSummaryModal"
 import type {
@@ -47,16 +48,6 @@ import type {
   PlayerPointStats,
   RosterPlayer,
 } from "@/types/types"
-
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
-const TOTAL_SLOTS = 24
-const DEFAULT_DIVIDERS = [8, 16] // Default to 3 lines (8 / 8 / 8)
-const MIN_POINTS = 29
-const DEFAULT_POINTS = 30
-const MAX_POINTS = 40
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -75,13 +66,13 @@ function emptyPoint(n: number): GameSheetPoint {
   return { pointNumber: n, playerIds: [], isCleanHold: false, isCleanBreak: false, scorer: null }
 }
 
-function normalizePlayers(rawPlayers: GameSheetPlayer[]): (GameSheetPlayer | null)[] {
-  const slots: (GameSheetPlayer | null)[] = Array.from({ length: TOTAL_SLOTS }, () => null)
-  
+function normalizePlayers(rawPlayers: GameSheetPlayer[], totalSlots: number): (GameSheetPlayer | null)[] {
+  const slots: (GameSheetPlayer | null)[] = Array.from({ length: totalSlots }, () => null)
+
   if (rawPlayers && rawPlayers.length > 0) {
     rawPlayers.forEach((p) => {
       if (p && p.playerId) {
-        const targetSlot = (typeof p.slotOrder === "number" && p.slotOrder >= 0 && p.slotOrder < TOTAL_SLOTS)
+        const targetSlot = (typeof p.slotOrder === "number" && p.slotOrder >= 0 && p.slotOrder < totalSlots)
           ? p.slotOrder
           : -1
 
@@ -99,7 +90,7 @@ function normalizePlayers(rawPlayers: GameSheetPlayer[]): (GameSheetPlayer | nul
   return slots
 }
 
-function emptyData(teamPlayers: PlayerBasic[]): GameSheetData {
+function emptyData(defaultDividers: number[]): GameSheetData {
   return {
     players: [],
     points: [],
@@ -109,7 +100,7 @@ function emptyData(teamPlayers: PlayerBasic[]): GameSheetData {
     ourTimeoutsH2: 0,
     theirTimeoutsH1: 0,
     theirTimeoutsH2: 0,
-    lineDividers: DEFAULT_DIVIDERS,
+    lineDividers: defaultDividers,
     isArchived: false,
     customTitle: "",
   }
@@ -139,6 +130,7 @@ interface SheetEntry {
 interface GameSheetProps {
   teamId: string
   teamName?: string
+  playersPerSide?: number
   teamPlayers: PlayerBasic[]
   initialSheets: SheetEntry[]
 }
@@ -158,7 +150,9 @@ function sheetLabel(sheet: SheetEntry): string {
 // GameSheet Component
 // ---------------------------------------------------------------------------
 
-export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets }: GameSheetProps) {
+export function GameSheet({ teamId, teamName = "OJ", playersPerSide = 7, teamPlayers, initialSheets }: GameSheetProps) {
+  const config = getTeamConfig(playersPerSide)
+  const { totalSlots, defaultDividers, dividerPresets, minPoints, defaultPoints, maxPoints } = config
   const [sheets, setSheets] = useState<SheetEntry[]>(initialSheets)
 
   // Initialize filter: if first sheet is archived, default to all or active
@@ -182,14 +176,14 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
   const activeSheet = getSheet(selectedSheetId) ?? sheets[0]
 
   const [data, setData] = useState<GameSheetData>(
-    () => activeSheet?.sheet_data ?? emptyData(teamPlayers)
+    () => activeSheet?.sheet_data ?? emptyData(defaultDividers)
   )
   const [opponentName, setOpponentName] = useState(activeSheet?.opponent_name ?? "")
   const [tournamentName, setTournamentName] = useState(activeSheet?.tournament_name ?? "")
   const [fieldName, setFieldName] = useState(activeSheet?.field ?? "")
   const [sheetTitle, setSheetTitle] = useState(activeSheet?.sheet_data?.customTitle ?? "")
   const [activePoints, setActivePoints] = useState(
-    () => activeSheet?.sheet_data?.totalPoints ?? Math.max(activeSheet?.sheet_data?.points?.length ?? 0, DEFAULT_POINTS)
+    () => activeSheet?.sheet_data?.totalPoints ?? Math.max(activeSheet?.sheet_data?.points?.length ?? 0, defaultPoints)
   )
 
   const [isPending, startTransition] = useTransition()
@@ -227,10 +221,10 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
 
   // Divider lines
-  const dividers = data.lineDividers ?? DEFAULT_DIVIDERS
+  const dividers = data.lineDividers ?? defaultDividers
 
-  // Convert raw players array into 24 fixed slots
-  const slots: (GameSheetPlayer | null)[] = normalizePlayers(data.players)
+  // Convert raw players array into fixed slots
+  const slots: (GameSheetPlayer | null)[] = normalizePlayers(data.players, totalSlots)
 
   // ── Switch to a different sheet ─────────────────────────────────────────
 
@@ -241,7 +235,7 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
     setData(sheet.sheet_data)
     setActivePoints(
       sheet.sheet_data?.totalPoints ??
-      Math.max(sheet.sheet_data?.points?.length ?? 0, DEFAULT_POINTS)
+      Math.max(sheet.sheet_data?.points?.length ?? 0, defaultPoints)
     )
     setOpponentName(sheet.opponent_name ?? "")
     setTournamentName(sheet.tournament_name ?? "")
@@ -261,7 +255,7 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
         id: result.id,
         opponent_name: null,
         field: null,
-        sheet_data: emptyData(teamPlayers),
+        sheet_data: emptyData(defaultDividers),
         tournament_name: null,
       }
       setSheets((prev) => [newSheet, ...prev])
@@ -315,7 +309,7 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
         switchSheet(remainingSheets[0].id)
       } else {
         setSelectedSheetId("")
-        setData(emptyData(teamPlayers))
+        setData(emptyData(defaultDividers))
       }
     })
   }
@@ -619,8 +613,10 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
     const has = point.playerIds.includes(playerId)
 
     // When adding (not removing) and gender ratio is enabled, check FMP-as-MMP
-    if (!has && data.genderRatioEnabled && data.startingRatio) {
-      if (isFmpAsMmp(playerId, point.playerIds, pointIndex, data.startingRatio as StartingRatio, teamPlayers)) {
+    // For 4v4 startingRatio is unused, so fall back to "4fmp-3mmp" as a neutral key
+    if (!has && data.genderRatioEnabled && (data.startingRatio || playersPerSide === 4)) {
+      const ratioKey = (data.startingRatio ?? "4fmp-3mmp") as StartingRatio
+      if (isFmpAsMmp(playerId, point.playerIds, pointIndex, ratioKey, teamPlayers, playersPerSide)) {
         setPendingFmpAsMmp({ playerId, pointIndex })
         return
       }
@@ -1265,8 +1261,8 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
                 </label>
                 <input
                   type="range"
-                  min={MIN_POINTS}
-                  max={MAX_POINTS}
+                  min={minPoints}
+                  max={maxPoints}
                   value={activePoints}
                   disabled={isReadOnly}
                   onChange={(e) => {
@@ -1389,11 +1385,11 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
                       ? "bg-pink-600 text-white shadow-sm"
                       : "bg-muted text-muted-foreground border border-border"
                   }`}
-                  title="Toggle gender ratio enforcement (FMP/MMP alternating)"
+                  title={playersPerSide === 4 ? "Toggle gender ratio enforcement (2F/2M)" : "Toggle gender ratio enforcement (FMP/MMP alternating)"}
                 >
                   ⚥ Ratio {displayData.genderRatioEnabled ? "On" : "Off"}
                 </button>
-                {displayData.genderRatioEnabled && (
+                {displayData.genderRatioEnabled && playersPerSide === 7 && (
                   <button
                     type="button"
                     disabled={isReadOnly}
@@ -1502,17 +1498,18 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
                           Point {selectedLivePoint + 1} Lineup:
                         </span>
                         <span className={`px-2 py-0.5 rounded-full font-bold text-xs ${
-                          currentLivePointObj.playerIds.length === 7
+                          currentLivePointObj.playerIds.length === playersPerSide
                             ? "bg-emerald-600 text-white"
-                            : currentLivePointObj.playerIds.length > 7
+                            : currentLivePointObj.playerIds.length > playersPerSide
                             ? "bg-rose-600 text-white"
                             : "bg-amber-500/20 text-amber-800 dark:text-amber-300"
                         }`}>
-                          {currentLivePointObj.playerIds.length} / 7 on field
+                          {currentLivePointObj.playerIds.length} / {playersPerSide} on field
                         </span>
-                        {displayData.genderRatioEnabled && displayData.startingRatio && (() => {
-                          const status = getRatioStatus(selectedLivePoint, displayData.startingRatio as StartingRatio, currentLivePointObj.playerIds, teamPlayers)
-                          const expected = getExpectedRatio(selectedLivePoint, displayData.startingRatio as StartingRatio)
+                        {displayData.genderRatioEnabled && (displayData.startingRatio || playersPerSide === 4) && (() => {
+                          const ratioKey = (displayData.startingRatio ?? "4fmp-3mmp") as StartingRatio
+                          const status = getRatioStatus(selectedLivePoint, ratioKey, currentLivePointObj.playerIds, teamPlayers, playersPerSide)
+                          const expected = getExpectedRatio(selectedLivePoint, ratioKey, playersPerSide)
                           const { fmp, mmp } = countGenders(currentLivePointObj.playerIds, teamPlayers)
                           return (
                             <span className={`px-2 py-0.5 rounded-full font-bold text-xs ${
@@ -1580,7 +1577,8 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
                     {/* ── FMP-as-MMP Confirmation ── */}
                     {pendingFmpAsMmp && pendingFmpAsMmp.pointIndex === selectedLivePoint && (() => {
                       const player = teamPlayers.find(p => p.id === pendingFmpAsMmp.playerId)
-                      const expected = displayData.startingRatio ? getExpectedRatio(selectedLivePoint, displayData.startingRatio as StartingRatio) : null
+                      const ratioKey = (displayData.startingRatio ?? "4fmp-3mmp") as StartingRatio
+                      const expected = getExpectedRatio(selectedLivePoint, ratioKey, playersPerSide)
                       return (
                         <div className="rounded-lg border-2 border-orange-400 bg-orange-50 dark:bg-orange-950/20 p-3 space-y-2">
                           <div className="text-xs font-bold text-orange-700 dark:text-orange-300">
@@ -1644,7 +1642,7 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
                       {Array.from({ length: sortedDividers.length + 1 }, (_, lineIdx) => {
                         const lineNum = lineIdx + 1
                         const startIdx = lineIdx === 0 ? 0 : sortedDividers[lineIdx - 1]
-                        const endIdx = lineIdx < sortedDividers.length ? sortedDividers[lineIdx] : TOTAL_SLOTS
+                        const endIdx = lineIdx < sortedDividers.length ? sortedDividers[lineIdx] : totalSlots
                         const lineSlots = slots
                           .map((player, slotIndex) => ({ player, slotIndex }))
                           .slice(startIdx, endIdx)
@@ -2052,7 +2050,7 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
                             if (isReadOnly) return
                             if (!isPlaced) {
                               const startIdx = selectedTargetLine === 1 ? 0 : (sortedDividers[selectedTargetLine - 2] ?? 0)
-                              const endIdx = selectedTargetLine - 1 < sortedDividers.length ? sortedDividers[selectedTargetLine - 1] : TOTAL_SLOTS
+                              const endIdx = selectedTargetLine - 1 < sortedDividers.length ? sortedDividers[selectedTargetLine - 1] : totalSlots
 
                               let targetSlot = -1
                               for (let i = startIdx; i < endIdx; i++) {
@@ -2268,50 +2266,24 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
                   <span className="font-semibold text-primary">Line Options:</span> Select a preset, or click &quot;+ Split Line&quot; between rows below:
                 </div>
                 <div className="flex flex-wrap gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => saveData({ ...displayData, lineDividers: [8, 16] })}
-                    className={`px-3 py-1 text-xs font-medium rounded border transition-colors ${
-                      dividers.length === 2 && dividers[0] === 8 && dividers[1] === 16
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "border-border bg-background hover:bg-accent text-foreground"
-                    }`}
-                  >
-                    3 Lines (8 / 8 / 8)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => saveData({ ...displayData, lineDividers: [10, 17] })}
-                    className={`px-3 py-1 text-xs font-medium rounded border transition-colors ${
-                      dividers.length === 2 && dividers[0] === 10 && dividers[1] === 17
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "border-border bg-background hover:bg-accent text-foreground"
-                    }`}
-                  >
-                    3 Lines (10 / 7 / 7)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => saveData({ ...displayData, lineDividers: [12] })}
-                    className={`px-3 py-1 text-xs font-medium rounded border transition-colors ${
-                      dividers.length === 1 && dividers[0] === 12
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "border-border bg-background hover:bg-accent text-foreground"
-                    }`}
-                  >
-                    2 Lines (12 / 12)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => saveData({ ...displayData, lineDividers: [] })}
-                    className={`px-2.5 py-1 text-xs font-medium rounded border transition-colors ${
-                      dividers.length === 0
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "border-border bg-background hover:bg-accent text-foreground"
-                    }`}
-                  >
-                    No Split
-                  </button>
+                  {dividerPresets.map((preset) => {
+                    const isActive = dividers.length === preset.dividers.length &&
+                      preset.dividers.every((d, i) => dividers[i] === d)
+                    return (
+                      <button
+                        key={preset.label}
+                        type="button"
+                        onClick={() => saveData({ ...displayData, lineDividers: preset.dividers })}
+                        className={`px-3 py-1 text-xs font-medium rounded border transition-colors ${
+                          isActive
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "border-border bg-background hover:bg-accent text-foreground"
+                        }`}
+                      >
+                        {preset.label}
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
             )}
@@ -2320,7 +2292,7 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
             <div className="sheet-header-print items-center justify-between border-b-2 border-black pb-1 mb-1">
               <div>
                 <span className="font-bold text-sm uppercase tracking-wide">
-                  {sheetTitle || "4s Game Sheet"}
+                  {sheetTitle || `${config.formatLabel} Game Sheet`}
                 </span>
                 {tournamentDate && <span className="font-normal ml-2 text-xs">({tournamentDate})</span>}
               </div>
@@ -2374,7 +2346,7 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
                   </tr>
                 </thead>
                 <tbody>
-                  {Array.from({ length: TOTAL_SLOTS }, (_, slotIndex) => {
+                  {Array.from({ length: totalSlots }, (_, slotIndex) => {
                     const rowNumber = slotIndex + 1
                     const player = slots[slotIndex]
                     const isDividerBefore = dividers.includes(slotIndex)
@@ -2388,7 +2360,7 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
                         {/* Divider Bar - Drop zone for whole line */}
                         {(isFirstRow || isDividerBefore) && (() => {
                           const startIdx = slotIndex
-                          const nextDiv = sortedDividers.find((d) => d > slotIndex) ?? TOTAL_SLOTS
+                          const nextDiv = sortedDividers.find((d) => d > slotIndex) ?? totalSlots
                           const endIdx = nextDiv
                           return (
                             <tr
@@ -2534,7 +2506,7 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
                         </tr>
 
                         {/* Divider toggle helper row in edit mode */}
-                        {showDividerControls && slotIndex < TOTAL_SLOTS - 1 && !dividers.includes(slotIndex + 1) && (
+                        {showDividerControls && slotIndex < totalSlots - 1 && !dividers.includes(slotIndex + 1) && (
                           <tr className="print:hidden">
                             <td
                               colSpan={6 + displayData.points.length}

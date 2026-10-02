@@ -7,8 +7,8 @@
 
 import type { GameSheetData } from "@/types/types"
 
-const DB_NAME = "4s_gamesheet_offline_db"
-const DB_VERSION = 1
+const DB_NAME = "gamesheet_offline_db"
+const DB_VERSION = 2
 
 export interface LocalGameSheet {
   id: string

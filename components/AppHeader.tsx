@@ -29,10 +29,13 @@ export function AppHeader({ teamName, currentTeamId, allTeams }: AppHeaderProps)
     <header className="border-b border-border bg-card sticky top-0 z-40 print:hidden">
       <div className="max-w-5xl mx-auto px-4 py-2 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <span className="font-extrabold text-base text-foreground tracking-tight">7s Gamesheet</span>
+          <span className="font-extrabold text-base text-foreground tracking-tight">Gamesheet</span>
 
-          {teamName && (
-            allTeams.length > 1 ? (
+          {teamName && (() => {
+            const activeTeam = allTeams.find((t) => t.id === currentTeamId)
+            const formatLabel = activeTeam ? (activeTeam.players_per_side === 4 ? "4v4" : "7v7") : ""
+            const badge = formatLabel ? `${teamName} · ${formatLabel}` : teamName
+            return allTeams.length > 1 ? (
               <select
                 value={currentTeamId}
                 disabled={isPending}
@@ -42,16 +45,16 @@ export function AppHeader({ teamName, currentTeamId, allTeams }: AppHeaderProps)
               >
                 {allTeams.map((t) => (
                   <option key={t.id} value={t.id}>
-                    {t.name}
+                    {t.name} · {t.players_per_side === 4 ? "4v4" : "7v7"}
                   </option>
                 ))}
               </select>
             ) : (
               <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                {teamName}
+                {badge}
               </span>
             )
-          )}
+          })()}
         </div>
 
         <nav className="flex items-center gap-1">

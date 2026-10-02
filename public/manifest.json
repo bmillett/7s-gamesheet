@@ -1,7 +1,7 @@
 {
-  "name": "4s Gamesheet",
-  "short_name": "4s Sheet",
-  "description": "Live game sheet for 4v4 mixed indoor ultimate frisbee",
+  "name": "Gamesheet",
+  "short_name": "Gamesheet",
+  "description": "Live game sheet for mixed ultimate frisbee",
   "start_url": "/sheet",
   "display": "standalone",
   "background_color": "#0a0a0a",

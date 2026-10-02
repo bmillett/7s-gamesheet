@@ -159,16 +159,17 @@ export async function deleteRosterPlayerAction(playerId: string) {
 
 // -- Team actions ------------------------------------------------------------
 
-export async function createTeamAction(userId: string, teamName: string) {
+export async function createTeamAction(userId: string, teamName: string, playersPerSide: 4 | 7 = 7) {
   try {
     // Verify the caller is authenticated
     await assertAuth()
     // Use service-role client to bypass RLS during initial team+member creation
     // (the user can't pass is_team_member() check before the member row exists)
     const admin = createAdminClient()
+    const rosterSize = playersPerSide === 4 ? 12 : 24
     const { data: team, error: teamErr } = await admin
       .from("teams")
-      .insert({ name: teamName })
+      .insert({ name: teamName, players_per_side: playersPerSide, roster_size: rosterSize })
       .select("*")
       .single()
     if (teamErr) return { error: teamErr.message }

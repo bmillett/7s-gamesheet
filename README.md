@@ -1,24 +1,27 @@
-# 7s Gamesheet
+# Gamesheet
 
-A progressive web app (PWA) for tracking live game scores, lineups, and player stats for 7v7 mixed ultimate frisbee.
+A progressive web app (PWA) for tracking live game scores, lineups, and player stats for mixed ultimate frisbee. Supports both **4v4** and **7v7** formats from a single codebase — the app adapts automatically based on the team's format.
 
 Built with [Next.js](https://nextjs.org), [Supabase](https://supabase.com), and [Tailwind CSS](https://tailwindcss.com). Deployed on [Vercel](https://vercel.com).
 
-**Live app:** https://7s-gamesheet.vercel.app
+**Live app:** https://gamesheet.vercel.app
 
 ---
 
 ## Features
 
 - **Roster management** — Add players with name, jersey number, position (Handler/Cutter/Hybrid), and gender designation (FMP/MMP)
-- **Game sheets** — 24-slot lineup grid with moveable line dividers; presets: 3 Lines 8/8/8 (default), 3 Lines 10/7/7, 2 Lines 12/12, No Split
+- **Game sheets** — Format-adaptive lineup grid with moveable line dividers (24 slots for 7v7, 12 for 4v4)
 - **Live sideline mode** — Large-format tablet/phone UI for scoring points in real time, with one-tap line selection
 - **Hold/Break tracking** — Automatically derives holds and breaks from starting possession; manual override supported
 - **Player stats** — Per-point goal scorer, assist, D-blocks, throwaways, drops
+- **Gender ratio enforcement** — Optional per-sheet toggle; 7v7 uses ABBA alternating 4F/3M pattern, 4v4 enforces 2F/2M fixed ratio
 - **Game summary** — Post-game modal with full player stat table
+- **Season stats** — Per-tournament records and player leaderboard across all sheets
 - **Offline support** — IndexedDB + service worker caches sheets for use without internet; syncs when back online
 - **PWA installable** — Add to Home Screen on iOS/Android for a native app feel
 - **Print layout** — Landscape print stylesheet for paper game sheets
+- **Multi-team** — One login can manage multiple teams; teams can be 4v4 or 7v7
 
 ---
 
@@ -43,6 +46,8 @@ NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 ```
+
+Optionally, set `NEXT_PUBLIC_FORMAT=4` or `NEXT_PUBLIC_FORMAT=7` to restrict the app to a single format (useful if deploying separate 4s/7s instances). Leave unset to show all teams.
 
 ### 3. Run locally
 
@@ -97,10 +102,11 @@ app/
     roster/page.tsx     # Roster editor page
     help/page.tsx       # Help & usage guide
 components/
-  GameSheet.tsx         # Main game sheet component
+  GameSheet.tsx         # Main game sheet component (format-adaptive)
   GameSummaryModal.tsx  # Post-game stats modal
   RosterEditor.tsx      # Roster CRUD table
-  CreateTeamForm.tsx    # First-login team setup
+  CreateTeamForm.tsx    # First-login team setup (includes 4v4/7v7 picker)
+  SeasonStatsPanel.tsx  # Season & tournament stats
   SyncStatusBadge.tsx   # Online/offline sync indicator
 lib/
   data/
@@ -110,6 +116,9 @@ lib/
   offline/
     sync-engine.ts      # IndexedDB queue + Supabase sync
     db.ts               # IndexedDB schema and helpers
+  utils/
+    team-config.ts      # Format constants derived from players_per_side
+    gender-ratio.ts     # Gender ratio utilities (4v4 and 7v7)
   supabase-browser.ts   # Client-side Supabase instance
   supabase-server.ts    # Server-side Supabase instance
   supabase-admin.ts     # Service-role client (bypasses RLS)

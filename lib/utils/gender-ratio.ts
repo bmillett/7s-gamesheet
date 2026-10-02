@@ -1,8 +1,9 @@
 /**
  * lib/utils/gender-ratio.ts
  *
- * Gender ratio utilities for 7v7 mixed ultimate.
+ * Gender ratio utilities for mixed ultimate frisbee.
  *
+ * --- 7v7 ---
  * The ABBAABBAA alternating pattern is period-4:
  *   [A, B, B, A,  A, B, B, A,  ...]
  *   idx: 0  1  2  3  4  5  6  7
@@ -14,6 +15,10 @@
  * startingRatio determines which gender has 4 on point 0.
  *   "4fmp-3mmp"  →  A = 4 FMP / 3 MMP,  B = 3 FMP / 4 MMP
  *   "3fmp-4mmp"  →  A = 3 FMP / 4 MMP,  B = 4 FMP / 3 MMP
+ *
+ * --- 4v4 ---
+ * Ratio is fixed every point: always 2 FMP / 2 MMP.
+ * startingRatio and pointIndex are ignored when playersPerSide === 4.
  */
 
 export type StartingRatio = "4fmp-3mmp" | "3fmp-4mmp"
@@ -31,8 +36,17 @@ export interface ExpectedRatio {
 
 export type RatioStatus = "ok" | "wrong" | "incomplete" | "disabled"
 
-/** Returns the expected FMP/MMP counts for a given point index and starting ratio. */
-export function getExpectedRatio(pointIndex: number, startingRatio: StartingRatio): ExpectedRatio {
+/**
+ * Returns the expected FMP/MMP counts for a given point index and starting ratio.
+ * For 4v4 (playersPerSide === 4), always returns { fmp: 2, mmp: 2 }.
+ */
+export function getExpectedRatio(
+  pointIndex: number,
+  startingRatio: StartingRatio,
+  playersPerSide = 7
+): ExpectedRatio {
+  if (playersPerSide === 4) return { fmp: 2, mmp: 2 }
+
   const mod = pointIndex % 4
   const isA = mod === 0 || mod === 3
 
@@ -68,23 +82,24 @@ export function countGenders(
 
 /**
  * Returns the ratio status for a point.
- *   "ok"         — correct ratio and exactly 7 players
- *   "wrong"      — 7 players but wrong gender split
- *   "incomplete" — fewer than 7 players (no error state yet)
+ *   "ok"         — correct ratio and all player slots filled
+ *   "wrong"      — all slots filled but wrong gender split
+ *   "incomplete" — fewer than playersPerSide players (no error state yet)
  *   "disabled"   — ratio enforcement is off
  */
 export function getRatioStatus(
   pointIndex: number,
   startingRatio: StartingRatio,
   playerIds: string[],
-  allPlayers: Array<{ id: string; gender: string }>
+  allPlayers: Array<{ id: string; gender: string }>,
+  playersPerSide = 7
 ): RatioStatus {
-  if (playerIds.length < 7) return "incomplete"
+  if (playerIds.length < playersPerSide) return "incomplete"
 
   const { fmp, mmp, unknown } = countGenders(playerIds, allPlayers)
   if (unknown > 0) return "wrong" // unknown gender counts as a violation
 
-  const expected = getExpectedRatio(pointIndex, startingRatio)
+  const expected = getExpectedRatio(pointIndex, startingRatio, playersPerSide)
   return fmp === expected.fmp && mmp === expected.mmp ? "ok" : "wrong"
 }
 
@@ -98,14 +113,15 @@ export function isFmpAsMmp(
   currentPlayerIds: string[],
   pointIndex: number,
   startingRatio: StartingRatio,
-  allPlayers: Array<{ id: string; gender: string }>
+  allPlayers: Array<{ id: string; gender: string }>,
+  playersPerSide = 7
 ): boolean {
   const genderMap = new Map(allPlayers.map((p) => [p.id, p.gender]))
   const incomingGender = genderMap.get(playerIdToAdd) ?? ""
   if (incomingGender !== "FMP") return false
 
   const { fmp } = countGenders(currentPlayerIds, allPlayers)
-  const expected = getExpectedRatio(pointIndex, startingRatio)
+  const expected = getExpectedRatio(pointIndex, startingRatio, playersPerSide)
 
   // FMP quota is already full — this player would overflow it
   return fmp >= expected.fmp

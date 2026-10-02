@@ -2,13 +2,13 @@ import type { Metadata, Viewport } from "next"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "7s Gamesheet",
-  description: "Live game sheet for 7v7 mixed ultimate frisbee",
+  title: "Gamesheet",
+  description: "Live game sheet for mixed ultimate frisbee",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "7s Sheet",
+    title: "Gamesheet",
   },
 }
 
