@@ -210,6 +210,7 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
   const [showPresetManager, setShowPresetManager] = useState(false)
   const [pendingFmpAsMmp, setPendingFmpAsMmp] = useState<{ playerId: string; pointIndex: number } | null>(null)
   const [newPresetName, setNewPresetName] = useState("")
+  const [newPresetPlayerIds, setNewPresetPlayerIds] = useState<string[]>([])
   const [renamingPresetId, setRenamingPresetId] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState("")
   const [isGridCollapsed, setIsGridCollapsed] = useState(false)
@@ -1622,7 +1623,7 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
                                 key={preset.id}
                                 type="button"
                                 disabled={isReadOnly}
-                                onClick={() => !isReadOnly && setLineOnField(preset.playerIds, selectedLivePoint)}
+                                onClick={() => !isReadOnly && preset.playerIds.length > 0 && setLineOnField(preset.playerIds.slice(0, 7), selectedLivePoint)}
                                 className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
                                   isActive
                                     ? "bg-amber-600 text-white border-amber-500 ring-2 ring-amber-400"
@@ -2172,43 +2173,90 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
                   </div>
                 )}
 
-                {/* Save current lineup as new preset */}
-                <div className="border-t border-amber-500/20 pt-2.5 space-y-1.5">
-                  <div className="text-[11px] text-muted-foreground">
-                    Save players currently on field for point {selectedLivePoint + 1} as a new preset:
+                {/* Create new preset */}
+                <div className="border-t border-amber-500/20 pt-2.5 space-y-2">
+                  <div className="text-[11px] font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wide">New Preset</div>
+
+                  {/* Name input */}
+                  <input
+                    type="text"
+                    value={newPresetName}
+                    onChange={(e) => setNewPresetName(e.target.value)}
+                    placeholder="e.g. Power O"
+                    className="w-full border border-input rounded-md px-2 py-1 text-xs bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                  />
+
+                  {/* Player picker */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] text-muted-foreground">
+                        Select players ({newPresetPlayerIds.length}/7)
+                      </span>
+                      <div className="flex gap-2">
+                        {gameMode && (displayData.points[selectedLivePoint]?.playerIds ?? []).length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => setNewPresetPlayerIds((displayData.points[selectedLivePoint]?.playerIds ?? []).slice(0, 7))}
+                            className="text-[11px] text-amber-600 hover:text-amber-800 font-medium"
+                          >
+                            Use current point
+                          </button>
+                        )}
+                        {newPresetPlayerIds.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => setNewPresetPlayerIds([])}
+                            className="text-[11px] text-muted-foreground hover:text-foreground"
+                          >
+                            Clear
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto">
+                      {teamPlayers.map((p) => {
+                        const isSelected = newPresetPlayerIds.includes(p.id)
+                        const atMax = newPresetPlayerIds.length >= 7
+                        return (
+                          <button
+                            key={p.id}
+                            type="button"
+                            disabled={!isSelected && atMax}
+                            onClick={() => {
+                              setNewPresetPlayerIds((prev) =>
+                                prev.includes(p.id)
+                                  ? prev.filter((id) => id !== p.id)
+                                  : prev.length < 7 ? [...prev, p.id] : prev
+                              )
+                            }}
+                            className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium border transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                              isSelected
+                                ? "bg-amber-600 text-white border-amber-500 ring-1 ring-amber-400"
+                                : "bg-card border-border text-foreground hover:bg-amber-500/10 hover:border-amber-400"
+                            }`}
+                          >
+                            {p.gender === "FMP" && <span className="w-1.5 h-1.5 rounded-full bg-pink-300 shrink-0" />}
+                            {p.gender === "MMP" && <span className="w-1.5 h-1.5 rounded-full bg-blue-300 shrink-0" />}
+                            {p.display_name}
+                          </button>
+                        )
+                      })}
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={newPresetName}
-                      onChange={(e) => setNewPresetName(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && newPresetName.trim()) {
-                          const ids = gameMode
-                            ? (displayData.points[selectedLivePoint]?.playerIds ?? [])
-                            : slots.filter(Boolean).map((s) => s!.playerId)
-                          saveData({ ...data, linePresets: [...(data.linePresets ?? []), { id: Math.random().toString(36).slice(2, 9), name: newPresetName.trim(), playerIds: ids }] })
-                          setNewPresetName("")
-                        }
-                      }}
-                      placeholder="e.g. Power O"
-                      className="flex-1 border border-input rounded-md px-2 py-1 text-xs bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                    />
-                    <button
-                      type="button"
-                      disabled={!newPresetName.trim()}
-                      onClick={() => {
-                        const ids = gameMode
-                          ? (displayData.points[selectedLivePoint]?.playerIds ?? [])
-                          : slots.filter(Boolean).map((s) => s!.playerId)
-                        saveData({ ...data, linePresets: [...(data.linePresets ?? []), { id: Math.random().toString(36).slice(2, 9), name: newPresetName.trim(), playerIds: ids }] })
-                        setNewPresetName("")
-                      }}
-                      className="px-3 py-1 rounded-md text-xs font-bold bg-amber-600 text-white hover:bg-amber-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                    >
-                      Save
-                    </button>
-                  </div>
+
+                  {/* Save button */}
+                  <button
+                    type="button"
+                    disabled={!newPresetName.trim() || newPresetPlayerIds.length === 0}
+                    onClick={() => {
+                      saveData({ ...data, linePresets: [...(data.linePresets ?? []), { id: Math.random().toString(36).slice(2, 9), name: newPresetName.trim(), playerIds: newPresetPlayerIds }] })
+                      setNewPresetName("")
+                      setNewPresetPlayerIds([])
+                    }}
+                    className="w-full px-3 py-1.5 rounded-md text-xs font-bold bg-amber-600 text-white hover:bg-amber-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Save Preset ({newPresetPlayerIds.length} players)
+                  </button>
                 </div>
               </div>
             )}
