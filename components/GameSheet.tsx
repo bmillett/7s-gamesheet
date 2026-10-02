@@ -1374,7 +1374,7 @@ export function GameSheet({ teamId, teamName = "OJ", teamPlayers, initialSheets 
                     </>
                   ) : (
                     <>
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="5 5 5 19"/><polyline points="19 5 19 19"/></svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"/><polyline points="9 5 3 12 9 19"/><polyline points="15 5 21 12 15 19"/></svg>
                       <span>End</span>
                     </>
                   )}
