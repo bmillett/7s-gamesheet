@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic"
 
 import { redirect } from "next/navigation"
-import { getCurrentUser, getTeamForUser } from "@/lib/data/auth"
+import { getCurrentUser, getTeamForUser, getActiveTeamId } from "@/lib/data/auth"
 import { getTeamMembers } from "@/lib/data/queries"
 import { CoachManager } from "@/components/CoachManager"
 
@@ -9,7 +9,7 @@ export default async function CoachesPage() {
   const user = await getCurrentUser()
   if (!user) redirect("/")
 
-  const team = await getTeamForUser()
+  const team = await getTeamForUser(await getActiveTeamId())
   if (!team) redirect("/sheet")
 
   const members = await getTeamMembers(team.id)

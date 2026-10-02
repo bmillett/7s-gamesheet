@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic"
 
 import { redirect } from "next/navigation"
-import { getCurrentUser, getTeamForUser } from "@/lib/data/auth"
+import { getCurrentUser, getTeamForUser, getActiveTeamId } from "@/lib/data/auth"
 import { getRosterPlayers, getSheets } from "@/lib/data/queries"
 import { GameSheet } from "@/components/GameSheet"
 
@@ -9,7 +9,7 @@ export default async function SheetPage() {
   const user = await getCurrentUser()
   if (!user) redirect("/")
 
-  const team = await getTeamForUser()
+  const team = await getTeamForUser(await getActiveTeamId())
   if (!team) redirect("/sheet") // CreateTeamForm shown in layout
 
   const [rosterPlayers, sheets] = await Promise.all([

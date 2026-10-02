@@ -2,16 +2,6 @@ import { createClient } from "@/lib/supabase-server"
 import { createAdminClient } from "@/lib/supabase-admin"
 import type { GameSheetRow, RosterPlayer, Team, TeamMember } from "@/types/types"
 
-export async function getTeamForUser(userId: string): Promise<Team | null> {
-  const supabase = await createClient()
-  const { data } = await supabase
-    .from("team_members")
-    .select("team:teams(*)")
-    .eq("user_id", userId)
-    .single()
-  return (data?.team as unknown as Team) ?? null
-}
-
 export async function getTeam(teamId: string): Promise<Team | null> {
   const supabase = await createClient()
   const { data } = await supabase

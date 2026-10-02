@@ -3,6 +3,8 @@
 import { createClient } from "@/lib/supabase-server"
 import { createAdminClient } from "@/lib/supabase-admin"
 import { revalidatePath } from "next/cache"
+import { cookies } from "next/headers"
+import { getTeamsForUser } from "@/lib/data/auth"
 import type { GameSheetData, RosterPlayer } from "@/types/types"
 
 // -- Auth guard --------------------------------------------------------------
@@ -304,6 +306,28 @@ export async function removeCoachAction(teamId: string, memberId: string) {
 
     revalidatePath("/coaches")
     return { success: true }
+  } catch (e: any) {
+    return { error: e.message }
+  }
+}
+
+// -- Team switcher -----------------------------------------------------------
+
+export async function setActiveTeamAction(teamId: string): Promise<{ error?: string }> {
+  try {
+    const teams = await getTeamsForUser()
+    if (!teams.find((t) => t.id === teamId)) {
+      return { error: "You are not a member of that team." }
+    }
+    const cookieStore = await cookies()
+    cookieStore.set("activeTeamId", teamId, {
+      httpOnly: false,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+    })
+    revalidatePath("/", "layout")
+    return {}
   } catch (e: any) {
     return { error: e.message }
   }

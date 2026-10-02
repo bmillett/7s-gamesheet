@@ -73,7 +73,7 @@ CREATE POLICY "teams_update" ON public.teams FOR UPDATE USING (is_team_member(id
 CREATE POLICY "teams_insert" ON public.teams FOR INSERT WITH CHECK (true); -- first-login create
 
 -- team_members: users can read own membership, insert own row
-CREATE POLICY "team_members_select" ON public.team_members FOR SELECT USING (user_id = auth.uid());
+CREATE POLICY "team_members_select" ON public.team_members FOR SELECT USING (is_team_member(team_id));
 CREATE POLICY "team_members_insert" ON public.team_members FOR INSERT WITH CHECK (user_id = auth.uid());
 
 -- roster_players: team members can do all CRUD
