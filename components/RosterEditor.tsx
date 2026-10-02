@@ -116,8 +116,10 @@ export function RosterEditor({ teamId, initialPlayers }: RosterEditorProps) {
       const jersey = parseInt(parts[0])
       const name = parts[1]
       const pos = parts[2] ?? ""
+      const rawGender = (parts[3] ?? "").toUpperCase()
+      const gender = rawGender === "FMP" || rawGender === "MMP" ? rawGender : ""
       if (!name) { setCsvError(`Missing name in: "${line}"`); return }
-      parsed.push({ display_name: name, jersey_number: isNaN(jersey) ? null : jersey, position: pos, gender: "", is_active: true, sort_order: players.length + parsed.length })
+      parsed.push({ display_name: name, jersey_number: isNaN(jersey) ? null : jersey, position: pos, gender, is_active: true, sort_order: players.length + parsed.length })
     }
     startTransition(async () => {
       const added: RosterPlayer[] = []
@@ -279,12 +281,12 @@ export function RosterEditor({ teamId, initialPlayers }: RosterEditorProps) {
 
         {showCsv && (
           <div className="mt-3 space-y-2">
-            <p className="text-xs text-muted-foreground">One player per line: <code className="bg-muted px-1 rounded">7, Jane Doe, Handler</code></p>
+            <p className="text-xs text-muted-foreground">One player per line: <code className="bg-muted px-1 rounded">7, Jane Doe, Handler, FMP</code></p>
             <textarea
               value={csvText}
               onChange={(e) => setCsvText(e.target.value)}
               rows={6}
-              placeholder={"7, Jane Doe, Handler\n11, John Smith, Cutter\n3, Alex Lee, Hybrid"}
+              placeholder={"7, Jane Doe, Handler, FMP\n11, John Smith, Cutter, MMP\n3, Alex Lee, Hybrid"}
               className="w-full rounded-lg border border-input bg-background p-2 text-xs font-mono text-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-y"
             />
             {csvError && <p className="text-xs text-destructive">{csvError}</p>}
