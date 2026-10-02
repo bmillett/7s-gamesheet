@@ -4,7 +4,6 @@ import { redirect } from "next/navigation"
 import { getCurrentUser, getTeamForUser, getActiveTeamId } from "@/lib/data/auth"
 import { getRosterPlayers } from "@/lib/data/queries"
 import { RosterEditor } from "@/components/RosterEditor"
-import { RosterSizeEditor } from "@/components/RosterSizeEditor"
 
 export default async function RosterPage() {
   const user = await getCurrentUser()
@@ -14,15 +13,16 @@ export default async function RosterPage() {
   if (!team) redirect("/sheet")
 
   const players = await getRosterPlayers(team.id)
+  const activePlayers = players.filter((p) => p.is_active)
 
   return (
     <div className="space-y-4">
       <div className="border-b border-border pb-3">
         <h1 className="text-lg font-bold text-foreground">Roster — {team.name}</h1>
         <p className="text-xs text-muted-foreground mt-0.5">
+          {activePlayers.length} active player{activePlayers.length !== 1 ? "s" : ""} · {players.length} total.
           Active players appear in the gamesheet bench.
         </p>
-        <RosterSizeEditor teamId={team.id} rosterSize={team.roster_size} />
       </div>
       <RosterEditor teamId={team.id} initialPlayers={players} />
     </div>
