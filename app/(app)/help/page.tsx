@@ -27,7 +27,7 @@ export default function HelpPage() {
           </div>
           <div className="p-3 flex gap-3">
             <span className="font-semibold text-foreground w-28 shrink-0">Gender</span>
-            <span className="text-muted-foreground"><strong className="text-pink-600">FMP</strong> = Female Matching Player, <strong className="text-blue-600">MMP</strong> = Male Matching Player. Shown as a coloured dot on the bench and live mode.</span>
+            <span className="text-muted-foreground"><strong className="text-pink-600">FMP</strong> = Female Matching Player, <strong className="text-blue-600">MMP</strong> = Male Matching Player. Shown as a coloured dot on the bench and in live mode.</span>
           </div>
           <div className="p-3 flex gap-3">
             <span className="font-semibold text-foreground w-28 shrink-0">Position</span>
@@ -65,7 +65,11 @@ export default function HelpPage() {
           </div>
           <div className="p-3 flex gap-3">
             <span className="font-semibold text-foreground w-36 shrink-0">Use as template</span>
-            <span className="text-muted-foreground">Duplicates the current roster layout and line dividers into a new sheet with scores reset — useful for back-to-back games.</span>
+            <span className="text-muted-foreground">Duplicates the current roster layout, line dividers, and line presets into a new sheet with scores reset — useful for back-to-back games.</span>
+          </div>
+          <div className="p-3 flex gap-3">
+            <span className="font-semibold text-foreground w-36 shrink-0">Points slider</span>
+            <span className="text-muted-foreground">Drag the <strong className="text-foreground">Points</strong> slider (29–40) to set how many point columns are shown. Defaults to 30. The setting is saved per sheet.</span>
           </div>
           <div className="p-3 flex gap-3">
             <span className="font-semibold text-foreground w-36 shrink-0">Archive sheet</span>
@@ -89,7 +93,7 @@ export default function HelpPage() {
           </div>
           <div className="p-3 flex gap-3">
             <span className="font-semibold text-foreground w-36 shrink-0">Mark out/injured</span>
-            <span className="text-muted-foreground">Click the 🩹 button on a bench card to mark a player as out. They will be crossed out and excluded from point tracking.</span>
+            <span className="text-muted-foreground">Click the ⚠️ button on a bench or player card to mark a player as out. They are crossed out and excluded from point tracking.</span>
           </div>
         </div>
 
@@ -109,41 +113,161 @@ export default function HelpPage() {
       {/* Live mode */}
       <section className="space-y-3">
         <h2 className="text-base font-bold text-foreground flex items-center gap-2">
-          <span>⚡</span> Live Game Mode (Sideline)
+          <span>🟢</span> Live Game Mode (Sideline)
         </h2>
         <p className="text-sm text-muted-foreground">
           Tap <strong className="text-foreground">⚡ Live Game Mode</strong> to switch to a large-format sideline view optimised for phones and tablets.
         </p>
+
+        <h3 className="text-sm font-semibold text-foreground pt-1">Scoring &amp; possession</h3>
         <div className="rounded-lg border border-border divide-y divide-border text-sm">
           <div className="p-3 flex gap-3">
             <span className="font-semibold text-foreground w-36 shrink-0">Score a point</span>
-            <span className="text-muted-foreground">Tap <strong className="text-emerald-600">+1 Us</strong> or <strong className="text-rose-600">+1 Them</strong>. The running score updates instantly. Tap again to undo.</span>
-          </div>
-          <div className="p-3 flex gap-3">
-            <span className="font-semibold text-foreground w-36 shrink-0">Set on-field players</span>
-            <span className="text-muted-foreground">Tap individual player cards to toggle them on/off field, or tap the <strong className="text-foreground">Line 1 / Line 2 / Line 3</strong> badge to add the whole line at once.</span>
+            <span className="text-muted-foreground">Tap <strong className="text-emerald-600">+1 Us</strong> or <strong className="text-rose-600">+1 Opponent</strong>. The running score updates instantly. Tap again to undo.</span>
           </div>
           <div className="p-3 flex gap-3">
             <span className="font-semibold text-foreground w-36 shrink-0">Starting possession</span>
-            <span className="text-muted-foreground">Set O-Line or D-Line at the start of the game. Hold/Break outcomes are derived automatically from this.</span>
+            <span className="text-muted-foreground">Set <strong className="text-foreground">Start On Offense</strong> or <strong className="text-foreground">Start On Defense</strong> before the game starts. Hold/Break outcomes are derived automatically from this setting.</span>
+          </div>
+          <div className="p-3 flex gap-3">
+            <span className="font-semibold text-foreground w-36 shrink-0">Starting end</span>
+            <span className="text-muted-foreground">Tap the arrow button to record which end of the field the team started at (← or →). Tap again to cycle through or clear. Teams switch ends at half.</span>
           </div>
           <div className="p-3 flex gap-3">
             <span className="font-semibold text-foreground w-36 shrink-0">Hold / Break</span>
             <span className="text-muted-foreground">Shown automatically after scoring. Use the Hold/Break checkboxes to manually override if the auto-detection is wrong.</span>
           </div>
+        </div>
+
+        <h3 className="text-sm font-semibold text-foreground pt-1">Setting the lineup</h3>
+        <div className="rounded-lg border border-border divide-y divide-border text-sm">
           <div className="p-3 flex gap-3">
-            <span className="font-semibold text-foreground w-36 shrink-0">Stats panel</span>
-            <span className="text-muted-foreground">Opens automatically after we score a point. Record goal scorer, assist, D-blocks, throwaways, and drops per player.</span>
+            <span className="font-semibold text-foreground w-36 shrink-0">Player cards</span>
+            <span className="text-muted-foreground">Tap individual player cards to toggle them on/off field. The badge shows <strong className="text-foreground">X / 7 on field</strong> — green when exactly 7 are selected.</span>
+          </div>
+          <div className="p-3 flex gap-3">
+            <span className="font-semibold text-foreground w-36 shrink-0">Line buttons</span>
+            <span className="text-muted-foreground">Tap <strong className="text-foreground">Line 1 / Line 2 / Line 3</strong> to set the entire line on field at once. Injured players are automatically excluded.</span>
+          </div>
+          <div className="p-3 flex gap-3">
+            <span className="font-semibold text-foreground w-36 shrink-0">⚡ Preset lines</span>
+            <span className="text-muted-foreground">Tap a named preset (e.g. <strong className="text-foreground">Power O</strong>) to instantly set those 7 players. Preset buttons appear above the line buttons when presets exist. See <em>Line Presets</em> below for how to create them.</span>
           </div>
           <div className="p-3 flex gap-3">
             <span className="font-semibold text-foreground w-36 shrink-0">Navigate points</span>
-            <span className="text-muted-foreground">Use the point list on the left to jump back to any previous point and review or edit the lineup and stats.</span>
+            <span className="text-muted-foreground">Use the point strip at the top of the live panel to jump to any point and review or edit the lineup and stats.</span>
+          </div>
+        </div>
+
+        <h3 className="text-sm font-semibold text-foreground pt-1">Stats panel</h3>
+        <div className="rounded-lg border border-border divide-y divide-border text-sm">
+          <div className="p-3 flex gap-3">
+            <span className="font-semibold text-foreground w-36 shrink-0">Open stats</span>
+            <span className="text-muted-foreground">The stats panel opens automatically when we score. It also has its own score buttons at the top right so you can score and record stats without scrolling.</span>
           </div>
           <div className="p-3 flex gap-3">
-            <span className="font-semibold text-foreground w-36 shrink-0">Timeouts</span>
+            <span className="font-semibold text-foreground w-36 shrink-0">Goal &amp; assist</span>
+            <span className="text-muted-foreground">Tap the player who caught the disc (Goal Scorer) and the thrower (Assist). Only on-field players are listed.</span>
+          </div>
+          <div className="p-3 flex gap-3">
+            <span className="font-semibold text-foreground w-36 shrink-0">Player stats</span>
+            <span className="text-muted-foreground">Use + / − to record D-blocks, throwaways, and drops per player for the current point.</span>
+          </div>
+        </div>
+
+        <h3 className="text-sm font-semibold text-foreground pt-1">Timeouts</h3>
+        <div className="rounded-lg border border-border divide-y divide-border text-sm">
+          <div className="p-3 flex gap-3">
+            <span className="font-semibold text-foreground w-36 shrink-0">Track timeouts</span>
             <span className="text-muted-foreground">Track 1st and 2nd half timeouts for both teams using the timeout panel below the lineup.</span>
           </div>
         </div>
+      </section>
+
+      {/* Line Presets */}
+      <section className="space-y-3">
+        <h2 className="text-base font-bold text-foreground flex items-center gap-2">
+          <span>⚡</span> Line Presets
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          Save named lineups (e.g. <strong className="text-foreground">Power O</strong>, <strong className="text-foreground">Power D</strong>, <strong className="text-foreground">Zone D</strong>) for quick selection during a game. Presets are saved with the sheet and copied when you use it as a template.
+        </p>
+        <div className="rounded-lg border border-border divide-y divide-border text-sm">
+          <div className="p-3 flex gap-3">
+            <span className="font-semibold text-foreground w-36 shrink-0">Open manager</span>
+            <span className="text-muted-foreground">Click <strong className="text-foreground">⚡ Presets</strong> in the toolbar to open the preset manager panel.</span>
+          </div>
+          <div className="p-3 flex gap-3">
+            <span className="font-semibold text-foreground w-36 shrink-0">Create preset</span>
+            <span className="text-muted-foreground">Type a name, then tap up to 7 players from the roster picker (pink dot = FMP, blue = MMP). In live mode, <strong className="text-foreground">Use current point</strong> fills the selection from whoever is on field. Tap <strong className="text-foreground">Save Preset</strong>.</span>
+          </div>
+          <div className="p-3 flex gap-3">
+            <span className="font-semibold text-foreground w-36 shrink-0">Rename / delete</span>
+            <span className="text-muted-foreground">Use the ✏️ icon to rename a preset inline, or ✕ to delete it.</span>
+          </div>
+          <div className="p-3 flex gap-3">
+            <span className="font-semibold text-foreground w-36 shrink-0">Apply in game</span>
+            <span className="text-muted-foreground">In live mode, preset buttons appear above Line 1/2/3. Tap a preset to set those players on field for the current point (max 7, injured players skipped). The button turns amber when active.</span>
+          </div>
+        </div>
+      </section>
+
+      {/* Gender ratio */}
+      <section className="space-y-3">
+        <h2 className="text-base font-bold text-foreground flex items-center gap-2">
+          <span>⚥</span> Gender Ratio Enforcement
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          For mixed 7v7, the gender ratio alternates each point: one gender has 4 players on for 1 point, then the other gender has 4 for the next 2, then back — the ABBAABBAA pattern.
+        </p>
+        <div className="rounded-lg border border-border divide-y divide-border text-sm">
+          <div className="p-3 flex gap-3">
+            <span className="font-semibold text-foreground w-36 shrink-0">Enable</span>
+            <span className="text-muted-foreground">Tap <strong className="text-pink-600">⚥ Ratio Off</strong> to turn enforcement on. The button turns pink when active.</span>
+          </div>
+          <div className="p-3 flex gap-3">
+            <span className="font-semibold text-foreground w-36 shrink-0">Starting ratio</span>
+            <span className="text-muted-foreground">Tap the ratio toggle button to set whether point 1 starts with <strong className="text-pink-600">4F/3M</strong> (pink) or <strong className="text-blue-600">3F/4M</strong> (blue). The pattern alternates automatically from there.</span>
+          </div>
+          <div className="p-3 flex gap-3">
+            <span className="font-semibold text-foreground w-36 shrink-0">Ratio badge</span>
+            <span className="text-muted-foreground">Next to the on-field player count, a badge shows the current FMP/MMP split. <strong className="text-pink-600">Pink ✓</strong> = correct ratio, <strong className="text-orange-500">Orange ⚠</strong> = wrong split, <strong className="text-muted-foreground">Grey</strong> = fewer than 7 players selected (hover for expected ratio).</span>
+          </div>
+          <div className="p-3 flex gap-3">
+            <span className="font-semibold text-foreground w-36 shrink-0">FMP as MMP</span>
+            <span className="text-muted-foreground">If you tap an FMP player when the FMP quota is already full, a confirmation prompt appears: <em>FMP playing as MMP-matching</em>. Tap <strong className="text-foreground">Confirm</strong> to add them anyway, or <strong className="text-foreground">Cancel</strong> to choose someone else.</span>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats page */}
+      <section className="space-y-3">
+        <h2 className="text-base font-bold text-foreground flex items-center gap-2">
+          <span>📈</span> Season Stats Page
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          The <strong className="text-foreground">📈 Stats</strong> page aggregates results across all your game sheets.
+        </p>
+        <div className="rounded-lg border border-border divide-y divide-border text-sm">
+          <div className="p-3 flex gap-3">
+            <span className="font-semibold text-foreground w-36 shrink-0">Games tab</span>
+            <span className="text-muted-foreground">All games grouped by tournament. Each row shows opponent, score, W/L, holds, breaks, and hold%. Subtotals per tournament and a season totals row at the bottom. Only <strong className="text-foreground">archived</strong> sheets count toward W/L record — active sheets show as <em>In Progress</em>.</span>
+          </div>
+          <div className="p-3 flex gap-3">
+            <span className="font-semibold text-foreground w-36 shrink-0">Players tab</span>
+            <span className="text-muted-foreground">Season leaderboard sorted by points played. Shows goals, assists, D-blocks, throwaways, and drops aggregated across all sheets.</span>
+          </div>
+        </div>
+      </section>
+
+      {/* Per-game summary */}
+      <section className="space-y-3">
+        <h2 className="text-base font-bold text-foreground flex items-center gap-2">
+          <span>📊</span> Game Summary
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          Tap <strong className="text-foreground">📊 Summary &amp; Stats</strong> on any sheet to open the per-game summary. It shows the final score, holds/breaks breakdown, and a full per-player stat table with goals, assists, D-blocks, throwaways, drops, O-line/D-line splits, and point +/−.
+        </p>
       </section>
 
       {/* Offline */}
@@ -164,16 +288,6 @@ export default function HelpPage() {
             <span className="text-muted-foreground">On iOS: tap the Share button then <strong className="text-foreground">Add to Home Screen</strong>. On Android: tap the browser menu then <strong className="text-foreground">Install App</strong>.</span>
           </div>
         </div>
-      </section>
-
-      {/* Summary */}
-      <section className="space-y-3">
-        <h2 className="text-base font-bold text-foreground flex items-center gap-2">
-          <span>📊</span> Game Summary
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          Tap <strong className="text-foreground">📊 Summary &amp; Stats</strong> at any time to open the post-game summary. It shows the final score, holds/breaks breakdown, and a full per-player stat table with goals, assists, D-blocks, throwaways, drops, O-line/D-line splits, and point +/-.
-        </p>
       </section>
     </div>
   )
